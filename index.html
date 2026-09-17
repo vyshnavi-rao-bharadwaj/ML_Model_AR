@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ML Models Interactive Visualization</title>
+
+    <!-- A-Frame Library -->
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #020617;
+        }
+
+        #header {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            width: 90%;
+            max-width: 500px;
+            background: rgba(15, 23, 42, 0.95);
+            color: #38bdf8;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #38bdf8;
+            text-align: center;
+        }
+
+        #header h1 {
+            margin: 0;
+            font-size: 15px;
+            text-transform: uppercase;
+        }
+
+        /* Mode Selector Buttons */
+        #mode-menu {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #475569;
+            padding: 6px 2px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .mode-btn.active {
+            background: #0284c7;
+            color: #ffffff;
+            border-color: #38bdf8;
+        }
+
+        /* Explainer Card */
+        #explainer-card {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            width: 90%;
+            max-width: 500px;
+            background: rgba(15, 23, 42, 0.95);
+            color: #ffffff;
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid #475569;
+        }
+
+        #step-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #facc15;
+            margin-bottom: 4px;
+        }
+
+        #step-desc {
+            font-size: 12px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="header">
+        <h1>Machine Learning Models Lab</h1>
+        <div id="mode-menu">
+            <button class="mode-btn active" id="btn-mix" onclick="switchMode('mix')">0. Mixed Data</button>
+            <button class="mode-btn" id="btn-class" onclick="switchMode('class')">1. Classify</button>
+            <button class="mode-btn" id="btn-reg" onclick="switchMode('reg')">2. Regression</button>
+            <button class="mode-btn" id="btn-cluster" onclick="switchMode('cluster')">3. Cluster</button>
+            <button class="mode-btn" id="btn-assoc" onclick="switchMode('assoc')">4. Association</button>
+        </div>
+    </div>
+
+    <div id="explainer-card">
+        <div id="step-title">0. Raw Mixed Data</div>
+        <p id="step-desc">
+            We start with mixed shapes: <b>Spheres (Circles)</b>, <b>Cubes (Squares)</b>, and <b>Cone (Triangles)</b> scattered randomly with different sizes.
+        </p>
+    </div>
+
+    <a-scene embedded vr-mode-ui="enabled: false" renderer="antialias: true; logarithmicDepthBuffer: true;">
+        <a-entity camera look-controls position="0 1 5.5"></a-entity>
+        <a-sky color="#020617"></a-sky>
+
+        <a-entity id="sceneContainer">
+            <!-- Classification Decision Boundary Line (Hidden by default) -->
+            <a-plane id="boundaryLine" position="-3 1 -0.1" width="0.08" height="3" color="#f43f5e" visible="false"></a-plane>
+
+            <!-- Regression Trend Line (Hidden by default) -->
+            <a-entity id="trendLine" line="start: -3 -0.2 0; end: 3 2.2 0; color: #facc15" visible="false"></a-entity>
+
+            <!-- Clustering Rings (Hidden by default) -->
+            <a-ring id="ring1" position="-1.8 1 -0.1" radius-inner="0.9" radius-outer="0.95" color="#38bdf8" visible="false"></a-ring>
+            <a-ring id="ring2" position="1.8 1 -0.1" radius-inner="0.9" radius-outer="0.95" color="#10b981" visible="false"></a-ring>
+
+            <!-- SHAPES DATASET -->
+            <!-- Spheres (Circles) -->
+            <a-sphere id="s1" radius="0.2" color="#38bdf8" position="-2 1.8 0"></a-sphere>
+            <a-sphere id="s2" radius="0.25" color="#38bdf8" position="-1 0.4 0"></a-sphere>
+            <a-sphere id="s3" radius="0.3" color="#38bdf8" position="1.5 1.5 0"></a-sphere>
+
+            <!-- Cubes (Squares) -->
+            <a-box id="c1" width="0.35" height="0.35" depth="0.35" color="#10b981" position="-1.5 1.2 0"></a-box>
+            <a-box id="c2" width="0.45" height="0.45" depth="0.45" color="#10b981" position="0.5 0.5 0"></a-box>
+            <a-box id="c3" width="0.55" height="0.55" depth="0.55" color="#10b981" position="2 0.8 0"></a-box>
+
+            <!-- Cones (Triangles) -->
+            <a-cone id="t1" radius-bottom="0.2" height="0.4" color="#a855f7" position="0.8 1.7 0"></a-cone>
+            <a-cone id="t2" radius-bottom="0.3" height="0.5" color="#a855f7" position="-0.5 1.6 0"></a-cone>
+        </a-entity>
+    </a-scene>
+
+    <script>
+        const modes = {
+            mix: {
+                title: "0. Raw Unprocessed Data",
+                desc: "Data in the real world is mixed together without structure. Here we have Spheres, Cubes, and Triangles scattered randomly.",
+                boundary: false, trend: false, rings: false,
+                positions: {
+                    s1: "-2 1.8 0", s2: "-1 0.4 0", s3: "1.5 1.5 0",
+                    c1: "-1.5 1.2 0", c2: "0.5 0.5 0", c3: "2 0.8 0",
+                    t1: "0.8 1.7 0", t2: "-0.5 1.6 0"
+                }
+            },
+            class: {
+                title: "1. Classification (Supervised)",
+                desc: "<b>Goal: Separate items into categories based on labels.</b> A red Decision Boundary line separates Spheres (Left) from Cubes/Triangles (Right).",
+                boundary: true, trend: false, rings: false,
+                positions: {
+                    s1: "-2.2 1.8 0", s2: "-2.0 1.0 0", s3: "-2.1 0.3 0",
+                    c1: "1.2 1.6 0", c2: "1.0 0.8 0", c3: "2.0 0.5 0",
+                    t1: "1.8 1.7 0", t2: "0.8 1.7 0"
+                }
+            },
+            reg: {
+                title: "2. Regression (Predicting Continuous Values)",
+                desc: "<b>Goal: Predict numerical quantities (e.g., Size).</b> All shapes move onto a yellow Trend Line ordered from smallest size (bottom left) to largest size (top right).",
+                boundary: false, trend: true, rings: false,
+                positions: {
+                    s1: "-2.2 0.1 0", t1: "-1.5 0.3 0", s2: "-0.8 0.6 0",
+                    t2: "-0.1 0.8 0", c1: "0.6 1.1 0", c2: "1.2 1.4 0",
+                    s3: "1.8 1.7 0", c3: "2.4 2.0 0"
+                }
+            },
+            cluster: {
+                title: "3. Clustering (Unsupervised)",
+                desc: "<b>Goal: Find hidden groups without labels.</b> The algorithm automatically groups data into 2 clusters based on spatial proximity (Blue & Green rings).",
+                boundary: false, trend: false, rings: true,
+                positions: {
+                    s1: "-2.1 1.2 0", c1: "-1.5 1.3 0", t2: "-1.7 0.7 0", s2: "-1.9 0.6 0",
+                    c2: "1.5 1.2 0", c3: "2.1 0.8 0", t1: "1.8 1.3 0", s3: "1.7 0.6 0"
+                }
+            },
+            assoc: {
+                title: "4. Association Rule Mining",
+                desc: "<b>Goal: Find items that frequently occur together.</b> Example: 'If a user picks a Sphere, 80% of the time they also pick a Triangle' (Linked together).",
+                boundary: false, trend: false, rings: false,
+                positions: {
+                    s1: "-2.0 1.2 0", t1: "-1.5 1.2 0",
+                    s2: "-0.3 1.2 0", t2: "0.2 1.2 0",
+                    s3: "1.4 1.2 0", c1: "1.9 1.2 0",
+                    c2: "-0.8 0.3 0", c3: "0.8 0.3 0"
+                }
+            }
+        };
+
+        function switchMode(modeKey) {
+            // Active button styling
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${modeKey}`).classList.add('active');
+
+            const mode = modes[modeKey];
+
+            // Update text content
+            document.getElementById('step-title').innerText = mode.title;
+            document.getElementById('step-desc').innerHTML = mode.desc;
+
+            // Toggle Visual Helpers
+            document.getElementById('boundaryLine').setAttribute('visible', mode.boundary);
+            document.getElementById('trendLine').setAttribute('visible', mode.trend);
+            document.getElementById('ring1').setAttribute('visible', mode.rings);
+            document.getElementById('ring2').setAttribute('visible', mode.rings);
+
+            // Animate Shapes to New Positions
+            for (let id in mode.positions) {
+                const element = document.getElementById(id);
+                const targetPos = mode.positions[id];
+                element.setAttribute('animation', `property: position; to: ${targetPos}; dur: 1000; easing: easeInOutCubic;`);
+            }
+        }
+    </script>
+</body>
+</html>
